@@ -93,10 +93,22 @@ def cleanup_old(prefix=NAME_PREFIX):
 def docker_run_cmd(lat, lon, results_file, name):
     """Собрать команду docker run в фоне (-d) с уникальным именем и --rm."""
     cmd = ["docker", "run", "-d", "--rm", "--name", name]
+
+    # (опционально) платформа
     if DOCKER_PLATFORM:
         cmd += ["--platform", DOCKER_PLATFORM]
+
+    # Явный DNS, чтобы не упереться в кривой резолвер
+    cmd += ["--dns", "1.1.1.1", "--dns", "8.8.8.8"]
+
+    # Отключаем QUIC и Chrome Network Stack (помогает под VPN/UDP)
+    cmd += ["-e", "CHROME_EXTRA_FLAGS=--disable-quic --disable-features=UseChromeNetworkStack"]
+
+    # Монтирование данных
+    cmd += ["-v", f"{os.getcwd()}/gmapsdata:/gmapsdata"]
+
+    # Образ + аргументы скрапера
     cmd += [
-        "-v", f"{os.getcwd()}/gmapsdata:/gmapsdata",
         SCRAPER_IMAGE,
         "-c", "8",
         "-input", "/gmapsdata/keywords.txt",
@@ -247,3 +259,4 @@ if __name__ == "__main__":
         t.join()
 
     _log("Все задачи обработаны.")
+
