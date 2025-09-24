@@ -58,16 +58,29 @@ def cleanup_old(prefix=NAME_PREFIX):
         if nm.startswith(prefix):
             run(["docker", "rm", "-f", nm])
 
-def docker_run_cmd(lat, lon, keywords_path, results_path, name):
+def docker_run_cmd(lat, lon, results_file, name):
+    """Собрать команду docker run в фоне (-d) с уникальным именем и --rm."""
     cmd = ["docker", "run", "-d", "--rm", "--name", name]
+
+    # (опционально) платформа
     if DOCKER_PLATFORM:
         cmd += ["--platform", DOCKER_PLATFORM]
+
+    # Явный DNS, чтобы не упереться в кривой резолвер
+    cmd += ["--dns", "1.1.1.1", "--dns", "8.8.8.8"]
+
+    # Отключаем QUIC и Chrome Network Stack (помогает под VPN/UDP)
+    cmd += ["-e", "CHROME_EXTRA_FLAGS=--disable-quic --disable-features=UseChromeNetworkStack"]
+
+    # Монтирование данных
+    cmd += ["-v", f"{os.getcwd()}/gmapsdata:/gmapsdata"]
+
+    # Образ + аргументы скрапера
     cmd += [
-        "-v", f"{os.getcwd()}/gmapsdata:/gmapsdata",
         SCRAPER_IMAGE,
-        "-c", "6",
-        "-input", f"/gmapsdata/{keywords_path.name}",
-        "-results", f"/gmapsdata/{results_path.name}",
+        "-c", "8",
+        "-input", "/gmapsdata/keywords.txt",
+        "-results", f"/gmapsdata/{results_file.name}",
         "-geo", f"{lat},{lon}",
         "-zoom", str(ZOOM),
         "-radius", str(RADIUS),
