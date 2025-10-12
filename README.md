@@ -29,8 +29,7 @@
 - Число дней существования объекта на google-maps, с помощью [парсинга даты самого раннего отзыва](https://github.com/uroplatus666/fitness_area/blob/master/reviews_dates_loading.ipynb)
 - [Площадь здания из OSM](https://github.com/uroplatus666/fitness_area/blob/master/area_build_osm.ipynb), в котором находится объект, если его координаты пересекаются с каким-то зданием OSM
 
-**HistGradientBoostingClassifier** 
-+ условия
+**Модель HistGradientBoostingClassifier** 
 
 ### [Обучающая выборка](https://github.com/uroplatus666/fitness_area/blob/master/classify/train_turkey.xlsx): 
 - г. Анкара
